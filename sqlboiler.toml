@@ -1,0 +1,7 @@
+[psql]
+sslmode = "disable"
+dbname = "fm"
+user = "postgres"
+pass = "456456123aAa."
+host = "localhost"
+port = "5432"
