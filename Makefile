@@ -6,3 +6,9 @@ graph-gen:
 
 orm-gen:
 	sqlboiler --wipe psql
+
+docker-build:
+	sudo docker-compose build
+
+docker-up:
+	sudo docker-compose up

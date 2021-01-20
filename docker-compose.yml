@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  database:
+    container_name: postgres-server
+    restart: always
+    image: postgres:latest
+    volumes:
+    - ./initilization:/docker-entrypoint-initdb.d
+    ports:
+    - "54322:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=456456123aAa.
+      - POSTGRES_DB=fm
+    networks:
+      - fm-graphql-network
+
+  server:
+    container_name: golang-server
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - fm-graphql-network
+
+volumes:
+  postgresdata:
+  databaseinit:
+  server:
+
+networks:
+  fm-graphql-network:
+    driver: bridge
