@@ -17,13 +17,13 @@ type SubscriptionRepo struct {
 }
 
 func (_self SubscriptionRepo) CreateSubscription(model *api_models.SubscriptionRepoInput) error {
-	query := `insert into subscriptions(requestorid, targetid) VALUES ($1, $2)`
+	query := `insert into subscriptions(requestor_id, target_id) VALUES ($1, $2)`
 	_, err := _self.Db.Exec(query, model.Requestor, model.Target)
 	return err
 }
 
 func (_self SubscriptionRepo) IsExistedSubscription(requestorID int, targetID int) (bool, error) {
-	query := `select exists(select true from subscriptions where requestorid=$1 AND targetid=$2)`
+	query := `select exists(select true from subscriptions where requestor_id=$1 AND target_id=$2)`
 	var exist bool
 	err := _self.Db.QueryRow(query, requestorID, targetID).Scan(&exist)
 	if err != nil {
@@ -36,7 +36,7 @@ func (_self SubscriptionRepo) IsExistedSubscription(requestorID int, targetID in
 }
 
 func (_self SubscriptionRepo) IsBlockedByOtherEmail(requestorID int, targetID int) (bool, error) {
-	query := `select exists(select true from blocks where (requestorid=$1 and targetid=$2) or (requestorid=$2 and targetid=$1))`
+	query := `select exists(select true from blocks where (requestor_id=$1 and target_id=$2) or (requestor_id=$2 and target_id=$1))`
 	var isBlock bool
 	err := _self.Db.QueryRow(query, requestorID, targetID).Scan(&isBlock)
 	if err != nil {

@@ -24,7 +24,7 @@ func TestFriendRepo_CreateFriend(t *testing.T) {
 				FirstID:  1,
 				SecondID: 2,
 			},
-			expectedErr: errors.New("pq: password authentication failed for user \"postgrespassword=000000\""),
+			expectedErr: errors.New("orm: unable to insert into friends: pq: password authentication failed for user \"postgrespassword=000000\""),
 			preparePath: "../testhelpers/preparedata/datafortest",
 			mockDB:      testhelpers.ConnectDBFailed(),
 		},

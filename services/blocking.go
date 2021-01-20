@@ -15,7 +15,7 @@ type BlockingService struct {
 }
 
 func (_self BlockingService) CreateBlocking(blocking *api_models.BlockingServiceInput) error {
-	//Create repo input graphqlmodels
+	//Create repo input graphql models
 	blockingRepoInputModel := &api_models.BlockingRepoInput{
 		Requestor: blocking.Requestor,
 		Target:    blocking.Target,

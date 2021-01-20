@@ -18,8 +18,8 @@ type Routes struct {
 
 func (_self Routes) Register() *chi.Mux {
 	chiServer := chi.NewRouter()
-	//GraphQL chiServer
 
+	//GraphQL
 	graphqlServer := handler.GraphQL(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
 		IUserService: services.UserService{
 			IUserRepo: repositories.UserRepo{
@@ -32,6 +32,16 @@ func (_self Routes) Register() *chi.Mux {
 			},
 			IUserRepo: repositories.UserRepo{
 				Db: _self.Db,
+			},
+		},
+		ISubscriptionService: services.SubscriptionService{
+			ISubscriptionRepo: repositories.SubscriptionRepo{
+				Db: _self.Db,
+			},
+		},
+		IBlockingService: services.BlockingService{
+			IBlockingRepo: repositories.BlockingRepo{
+				_self.Db,
 			},
 		},
 	}}))

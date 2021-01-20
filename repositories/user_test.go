@@ -22,7 +22,7 @@ func TestUserRepo_CreateUser(t *testing.T) {
 			input: &api_models.UserRepoInput{
 				Email: "abc@gmail.com",
 			},
-			expectedErr: errors.New("pq: password authentication failed for user \"postgrespassword=000000\""),
+			expectedErr: errors.New("orm: unable to insert into useremails: pq: password authentication failed for user \"postgrespassword=000000\""),
 			mockDB:      testhelpers.ConnectDBFailed(),
 		},
 		{
@@ -45,7 +45,7 @@ func TestUserRepo_CreateUser(t *testing.T) {
 			}
 
 			// When
-			err := UserRepo.CreateUser(testCase.input)
+			_, err := UserRepo.CreateUser(testCase.input)
 
 			// Then
 			if testCase.expectedErr != nil {

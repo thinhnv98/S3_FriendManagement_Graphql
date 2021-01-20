@@ -10,11 +10,12 @@ import (
 
 func TestUserService_CreateUser(t *testing.T) {
 	testCases := []struct {
-		name          string
-		input         *api_models.UserServiceInput
-		expectedErr   error
-		mockRepoInput *api_models.UserRepoInput
-		mockRepoErr   error
+		name           string
+		input          *api_models.UserServiceInput
+		expectedErr    error
+		mockRepoInput  *api_models.UserRepoInput
+		mockRepoOutput int
+		mockRepoErr    error
 	}{
 		{
 			name: "Create user failed with error",
@@ -25,7 +26,8 @@ func TestUserService_CreateUser(t *testing.T) {
 			mockRepoInput: &api_models.UserRepoInput{
 				Email: "xyz@gmail.com",
 			},
-			mockRepoErr: errors.New("create user failed with error"),
+			mockRepoOutput: 1,
+			mockRepoErr:    errors.New("create user failed with error"),
 		},
 		{
 			name: "Create user success",
@@ -36,7 +38,8 @@ func TestUserService_CreateUser(t *testing.T) {
 			mockRepoInput: &api_models.UserRepoInput{
 				Email: "xyz@gmail.com",
 			},
-			mockRepoErr: nil,
+			mockRepoOutput: 1,
+			mockRepoErr:    nil,
 		},
 	}
 	for _, testCase := range testCases {
@@ -44,14 +47,14 @@ func TestUserService_CreateUser(t *testing.T) {
 			//Given
 			mockUserRepo := new(mockUserRepo)
 			mockUserRepo.On("CreateUser", testCase.mockRepoInput).
-				Return(testCase.mockRepoErr)
+				Return(testCase.mockRepoOutput, testCase.mockRepoErr)
 
 			service := UserService{
 				IUserRepo: mockUserRepo,
 			}
 
 			//When
-			err := service.CreateUser(testCase.input)
+			_, err := service.CreateUser(testCase.input)
 
 			//Then
 			if testCase.expectedErr != nil {

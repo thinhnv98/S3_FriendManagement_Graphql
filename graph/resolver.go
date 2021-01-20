@@ -9,6 +9,8 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	IUserService   services.IUserService
-	IFriendService services.IFriendService
+	IUserService         services.IUserService
+	IFriendService       services.IFriendService
+	ISubscriptionService services.ISubscriptionService
+	IBlockingService     services.IBlockingService
 }

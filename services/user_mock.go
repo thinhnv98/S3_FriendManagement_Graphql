@@ -2,6 +2,7 @@ package services
 
 import (
 	"S3_FriendManagement_Graphql/modelss/api-models"
+	"S3_FriendManagement_Graphql/modelss/orm"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -9,13 +10,34 @@ type mockUserRepo struct {
 	mock.Mock
 }
 
-func (_self mockUserRepo) CreateUser(userRepoInput *api_models.UserRepoInput) error {
+func (_self mockUserRepo) CreateUser(userRepoInput *api_models.UserRepoInput) (int, error) {
 	args := _self.Called(userRepoInput)
-	var r error
-	if args.Get(0) != nil {
-		r = args.Get(0).(error)
+	r0 := args.Get(0).(int)
+	var r1 error
+	if args.Get(1) != nil {
+		r1 = args.Get(1).(error)
 	}
-	return r
+	return r0, r1
+}
+
+func (_self mockUserRepo) GetAllUser() (orm.UseremailSlice, error) {
+	args := _self.Called()
+	r0 := args.Get(0).(orm.UseremailSlice)
+	var r1 error
+	if args.Get(1) != nil {
+		r1 = args.Get(1).(error)
+	}
+	return r0, r1
+}
+
+func (_self mockUserRepo) GetUserWithCondition(id int, email string) (orm.UseremailSlice, error) {
+	args := _self.Called()
+	r0 := args.Get(0).(orm.UseremailSlice)
+	var r1 error
+	if args.Get(1) != nil {
+		r1 = args.Get(1).(error)
+	}
+	return r0, r1
 }
 
 func (_self mockUserRepo) GetUserIDByEmail(email string) (int, error) {

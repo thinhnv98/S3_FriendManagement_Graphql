@@ -1,12 +1,12 @@
 package main
 
 import (
-	"S3_FriendManagement_Graphql/config"
-	"S3_FriendManagement_Graphql/routes"
 	"log"
 	"net/http"
 	"os"
 
+	"S3_FriendManagement_Graphql/config"
+	"S3_FriendManagement_Graphql/routes"
 	"github.com/joho/godotenv"
 )
 

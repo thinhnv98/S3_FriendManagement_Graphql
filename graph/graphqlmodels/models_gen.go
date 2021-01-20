@@ -2,16 +2,41 @@
 
 package graphqlmodels
 
+type Email struct {
+	Email string `json:"email"`
+}
+
+type FriendList struct {
+	Success bool     `json:"success"`
+	Friends []string `json:"friends"`
+	Count   int      `json:"count"`
+}
+
 type Friends struct {
 	Friends []string `json:"friends"`
 }
 
-type IsFriend struct {
+type IsSuccess struct {
 	Success bool `json:"success"`
 }
 
 type NewUser struct {
 	Email string `json:"email"`
+}
+
+type ReceiveUpdateEmailList struct {
+	Success    bool     `json:"success"`
+	Recipients []string `json:"recipients"`
+}
+
+type RequestTarget struct {
+	Requestor string `json:"requestor"`
+	Target    string `json:"target"`
+}
+
+type SendMail struct {
+	Sender string `json:"sender"`
+	Text   string `json:"text"`
 }
 
 type Success struct {

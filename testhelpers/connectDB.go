@@ -12,8 +12,8 @@ func ConnectDB() *sql.DB {
 		host     = "localhost"
 		port     = 5432
 		user     = "postgres"
-		password = "456456123a"
-		dbname   = "FriendManagement"
+		password = "456456123aAa."
+		dbname   = "fm"
 	)
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -32,7 +32,7 @@ func ConnectDBFailed() *sql.DB {
 		port     = 5432
 		user     = "postgres"
 		password = "000000"
-		dbname   = "FriendManagement"
+		dbname   = "fm"
 	)
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s"+"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)

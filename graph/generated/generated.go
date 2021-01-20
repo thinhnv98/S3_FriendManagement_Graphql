@@ -43,17 +43,33 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	IsFriend struct {
+	FriendList struct {
+		Count   func(childComplexity int) int
+		Friends func(childComplexity int) int
+		Success func(childComplexity int) int
+	}
+
+	IsSuccess struct {
 		Success func(childComplexity int) int
 	}
 
 	Mutation struct {
-		CreateFriend func(childComplexity int, input graphqlmodels.Friends) int
-		CreateUser   func(childComplexity int, input graphqlmodels.NewUser) int
+		BlockUpdate                func(childComplexity int, input graphqlmodels.RequestTarget) int
+		CommonFriends              func(childComplexity int, input graphqlmodels.Friends) int
+		CreateFriend               func(childComplexity int, input graphqlmodels.Friends) int
+		CreateUser                 func(childComplexity int, input graphqlmodels.NewUser) int
+		FriendList                 func(childComplexity int, input graphqlmodels.Email) int
+		RetrieveEmailReceiveUpdate func(childComplexity int, input graphqlmodels.SendMail) int
+		Subscribe                  func(childComplexity int, input graphqlmodels.RequestTarget) int
 	}
 
 	Query struct {
 		Users func(childComplexity int, id *int, email *string) int
+	}
+
+	ReceiveUpdateEmailList struct {
+		Recipients func(childComplexity int) int
+		Success    func(childComplexity int) int
 	}
 
 	Success struct {
@@ -68,7 +84,12 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input graphqlmodels.NewUser) (*graphqlmodels.User, error)
-	CreateFriend(ctx context.Context, input graphqlmodels.Friends) (*graphqlmodels.IsFriend, error)
+	CreateFriend(ctx context.Context, input graphqlmodels.Friends) (*graphqlmodels.IsSuccess, error)
+	FriendList(ctx context.Context, input graphqlmodels.Email) (*graphqlmodels.FriendList, error)
+	CommonFriends(ctx context.Context, input graphqlmodels.Friends) (*graphqlmodels.FriendList, error)
+	Subscribe(ctx context.Context, input graphqlmodels.RequestTarget) (*graphqlmodels.IsSuccess, error)
+	BlockUpdate(ctx context.Context, input graphqlmodels.RequestTarget) (*graphqlmodels.IsSuccess, error)
+	RetrieveEmailReceiveUpdate(ctx context.Context, input graphqlmodels.SendMail) (*graphqlmodels.ReceiveUpdateEmailList, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context, id *int, email *string) ([]*graphqlmodels.User, error)
@@ -89,12 +110,57 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "IsFriend.success":
-		if e.complexity.IsFriend.Success == nil {
+	case "FriendList.count":
+		if e.complexity.FriendList.Count == nil {
 			break
 		}
 
-		return e.complexity.IsFriend.Success(childComplexity), true
+		return e.complexity.FriendList.Count(childComplexity), true
+
+	case "FriendList.friends":
+		if e.complexity.FriendList.Friends == nil {
+			break
+		}
+
+		return e.complexity.FriendList.Friends(childComplexity), true
+
+	case "FriendList.success":
+		if e.complexity.FriendList.Success == nil {
+			break
+		}
+
+		return e.complexity.FriendList.Success(childComplexity), true
+
+	case "IsSuccess.success":
+		if e.complexity.IsSuccess.Success == nil {
+			break
+		}
+
+		return e.complexity.IsSuccess.Success(childComplexity), true
+
+	case "Mutation.blockUpdate":
+		if e.complexity.Mutation.BlockUpdate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_blockUpdate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BlockUpdate(childComplexity, args["input"].(graphqlmodels.RequestTarget)), true
+
+	case "Mutation.commonFriends":
+		if e.complexity.Mutation.CommonFriends == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_commonFriends_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CommonFriends(childComplexity, args["input"].(graphqlmodels.Friends)), true
 
 	case "Mutation.createFriend":
 		if e.complexity.Mutation.CreateFriend == nil {
@@ -120,6 +186,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(graphqlmodels.NewUser)), true
 
+	case "Mutation.friendList":
+		if e.complexity.Mutation.FriendList == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_friendList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.FriendList(childComplexity, args["input"].(graphqlmodels.Email)), true
+
+	case "Mutation.retrieveEmailReceiveUpdate":
+		if e.complexity.Mutation.RetrieveEmailReceiveUpdate == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_retrieveEmailReceiveUpdate_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RetrieveEmailReceiveUpdate(childComplexity, args["input"].(graphqlmodels.SendMail)), true
+
+	case "Mutation.subscribe":
+		if e.complexity.Mutation.Subscribe == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_subscribe_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Subscribe(childComplexity, args["input"].(graphqlmodels.RequestTarget)), true
+
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
 			break
@@ -131,6 +233,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Users(childComplexity, args["id"].(*int), args["email"].(*string)), true
+
+	case "ReceiveUpdateEmailList.recipients":
+		if e.complexity.ReceiveUpdateEmailList.Recipients == nil {
+			break
+		}
+
+		return e.complexity.ReceiveUpdateEmailList.Recipients(childComplexity), true
+
+	case "ReceiveUpdateEmailList.success":
+		if e.complexity.ReceiveUpdateEmailList.Success == nil {
+			break
+		}
+
+		return e.complexity.ReceiveUpdateEmailList.Success(childComplexity), true
 
 	case "Success.status":
 		if e.complexity.Success.Status == nil {
@@ -217,40 +333,68 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `
-# GraphQL schema example
+	{Name: "graph/schema.graphqls", Input: `# GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
 type User {
-  id: Int!
-  email: String!
+    id: Int!
+    email: String!
 }
 
 type Success {
-  status: String!
+    status: String!
 }
 
+type FriendList {
+    success: Boolean!
+    friends: [String!]!
+    count: Int!
+}
 
-type IsFriend {
-  success: Boolean!
+type IsSuccess {
+    success: Boolean!
+}
+
+type ReceiveUpdateEmailList {
+    success: Boolean!
+    recipients: [String!]!
 }
 
 input NewUser {
-  email: String!
+    email: String!
 }
 
 input Friends {
-  friends: [String!]!
+    friends: [String!]!
+}
+
+input Email {
+    email: String!
+}
+
+input RequestTarget {
+    requestor: String!,
+    target: String!
+}
+
+input SendMail {
+    sender: String!
+    text: String!
 }
 
 type Query {
-  users(id: Int, email: String): [User!]!
+    users(id: Int, email: String): [User!]!
 }
 
 type Mutation {
-  createUser(input: NewUser!): User!
-  createFriend(input: Friends!): IsFriend!
+    createUser(input: NewUser!): User!
+    createFriend(input: Friends!): IsSuccess!
+    friendList(input: Email!): FriendList!
+    commonFriends(input: Friends!): FriendList!
+    subscribe(input: RequestTarget!): IsSuccess!
+    blockUpdate(input: RequestTarget!): IsSuccess!
+    retrieveEmailReceiveUpdate(input: SendMail!): ReceiveUpdateEmailList!
 }
 `, BuiltIn: false},
 }
@@ -259,6 +403,36 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_blockUpdate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphqlmodels.RequestTarget
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRequestTarget2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐRequestTarget(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_commonFriends_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphqlmodels.Friends
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNFriends2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriends(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createFriend_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -282,6 +456,51 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNNewUser2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐNewUser(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_friendList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphqlmodels.Email
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNEmail2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐEmail(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_retrieveEmailReceiveUpdate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphqlmodels.SendMail
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSendMail2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐSendMail(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_subscribe_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 graphqlmodels.RequestTarget
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRequestTarget2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐRequestTarget(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -367,7 +586,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _IsFriend_success(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.IsFriend) (ret graphql.Marshaler) {
+func (ec *executionContext) _FriendList_success(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.FriendList) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -375,7 +594,112 @@ func (ec *executionContext) _IsFriend_success(ctx context.Context, field graphql
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "IsFriend",
+		Object:     "FriendList",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FriendList_friends(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.FriendList) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FriendList",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Friends, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FriendList_count(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.FriendList) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FriendList",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IsSuccess_success(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.IsSuccess) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IsSuccess",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -481,9 +805,219 @@ func (ec *executionContext) _Mutation_createFriend(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*graphqlmodels.IsFriend)
+	res := resTmp.(*graphqlmodels.IsSuccess)
 	fc.Result = res
-	return ec.marshalNIsFriend2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsFriend(ctx, field.Selections, res)
+	return ec.marshalNIsSuccess2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsSuccess(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_friendList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_friendList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FriendList(rctx, args["input"].(graphqlmodels.Email))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphqlmodels.FriendList)
+	fc.Result = res
+	return ec.marshalNFriendList2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriendList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_commonFriends(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_commonFriends_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CommonFriends(rctx, args["input"].(graphqlmodels.Friends))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphqlmodels.FriendList)
+	fc.Result = res
+	return ec.marshalNFriendList2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriendList(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_subscribe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_subscribe_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Subscribe(rctx, args["input"].(graphqlmodels.RequestTarget))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphqlmodels.IsSuccess)
+	fc.Result = res
+	return ec.marshalNIsSuccess2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsSuccess(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_blockUpdate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_blockUpdate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().BlockUpdate(rctx, args["input"].(graphqlmodels.RequestTarget))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphqlmodels.IsSuccess)
+	fc.Result = res
+	return ec.marshalNIsSuccess2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsSuccess(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_retrieveEmailReceiveUpdate(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_retrieveEmailReceiveUpdate_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RetrieveEmailReceiveUpdate(rctx, args["input"].(graphqlmodels.SendMail))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*graphqlmodels.ReceiveUpdateEmailList)
+	fc.Result = res
+	return ec.marshalNReceiveUpdateEmailList2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐReceiveUpdateEmailList(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -597,6 +1131,76 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiveUpdateEmailList_success(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.ReceiveUpdateEmailList) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiveUpdateEmailList",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Success, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ReceiveUpdateEmailList_recipients(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.ReceiveUpdateEmailList) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "ReceiveUpdateEmailList",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Recipients, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Success_status(ctx context.Context, field graphql.CollectedField, obj *graphqlmodels.Success) (ret graphql.Marshaler) {
@@ -1791,6 +2395,26 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputEmail(ctx context.Context, obj interface{}) (graphqlmodels.Email, error) {
+	var it graphqlmodels.Email
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputFriends(ctx context.Context, obj interface{}) (graphqlmodels.Friends, error) {
 	var it graphqlmodels.Friends
 	var asMap = obj.(map[string]interface{})
@@ -1831,6 +2455,62 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRequestTarget(ctx context.Context, obj interface{}) (graphqlmodels.RequestTarget, error) {
+	var it graphqlmodels.RequestTarget
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "requestor":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requestor"))
+			it.Requestor, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "target":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("target"))
+			it.Target, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSendMail(ctx context.Context, obj interface{}) (graphqlmodels.SendMail, error) {
+	var it graphqlmodels.SendMail
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "sender":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sender"))
+			it.Sender, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "text":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
+			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1839,19 +2519,56 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
-var isFriendImplementors = []string{"IsFriend"}
+var friendListImplementors = []string{"FriendList"}
 
-func (ec *executionContext) _IsFriend(ctx context.Context, sel ast.SelectionSet, obj *graphqlmodels.IsFriend) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, isFriendImplementors)
+func (ec *executionContext) _FriendList(ctx context.Context, sel ast.SelectionSet, obj *graphqlmodels.FriendList) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, friendListImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("IsFriend")
+			out.Values[i] = graphql.MarshalString("FriendList")
 		case "success":
-			out.Values[i] = ec._IsFriend_success(ctx, field, obj)
+			out.Values[i] = ec._FriendList_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "friends":
+			out.Values[i] = ec._FriendList_friends(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "count":
+			out.Values[i] = ec._FriendList_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var isSuccessImplementors = []string{"IsSuccess"}
+
+func (ec *executionContext) _IsSuccess(ctx context.Context, sel ast.SelectionSet, obj *graphqlmodels.IsSuccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, isSuccessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("IsSuccess")
+		case "success":
+			out.Values[i] = ec._IsSuccess_success(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1888,6 +2605,31 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createFriend":
 			out.Values[i] = ec._Mutation_createFriend(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "friendList":
+			out.Values[i] = ec._Mutation_friendList(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "commonFriends":
+			out.Values[i] = ec._Mutation_commonFriends(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "subscribe":
+			out.Values[i] = ec._Mutation_subscribe(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "blockUpdate":
+			out.Values[i] = ec._Mutation_blockUpdate(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "retrieveEmailReceiveUpdate":
+			out.Values[i] = ec._Mutation_retrieveEmailReceiveUpdate(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1935,6 +2677,38 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var receiveUpdateEmailListImplementors = []string{"ReceiveUpdateEmailList"}
+
+func (ec *executionContext) _ReceiveUpdateEmailList(ctx context.Context, sel ast.SelectionSet, obj *graphqlmodels.ReceiveUpdateEmailList) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, receiveUpdateEmailListImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReceiveUpdateEmailList")
+		case "success":
+			out.Values[i] = ec._ReceiveUpdateEmailList_success(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "recipients":
+			out.Values[i] = ec._ReceiveUpdateEmailList_recipients(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2265,6 +3039,25 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNEmail2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐEmail(ctx context.Context, v interface{}) (graphqlmodels.Email, error) {
+	res, err := ec.unmarshalInputEmail(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFriendList2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriendList(ctx context.Context, sel ast.SelectionSet, v graphqlmodels.FriendList) graphql.Marshaler {
+	return ec._FriendList(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNFriendList2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriendList(ctx context.Context, sel ast.SelectionSet, v *graphqlmodels.FriendList) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FriendList(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNFriends2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐFriends(ctx context.Context, v interface{}) (graphqlmodels.Friends, error) {
 	res, err := ec.unmarshalInputFriends(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2285,22 +3078,46 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNIsFriend2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsFriend(ctx context.Context, sel ast.SelectionSet, v graphqlmodels.IsFriend) graphql.Marshaler {
-	return ec._IsFriend(ctx, sel, &v)
+func (ec *executionContext) marshalNIsSuccess2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsSuccess(ctx context.Context, sel ast.SelectionSet, v graphqlmodels.IsSuccess) graphql.Marshaler {
+	return ec._IsSuccess(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNIsFriend2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsFriend(ctx context.Context, sel ast.SelectionSet, v *graphqlmodels.IsFriend) graphql.Marshaler {
+func (ec *executionContext) marshalNIsSuccess2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐIsSuccess(ctx context.Context, sel ast.SelectionSet, v *graphqlmodels.IsSuccess) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._IsFriend(ctx, sel, v)
+	return ec._IsSuccess(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNNewUser2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐNewUser(ctx context.Context, v interface{}) (graphqlmodels.NewUser, error) {
 	res, err := ec.unmarshalInputNewUser(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNReceiveUpdateEmailList2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐReceiveUpdateEmailList(ctx context.Context, sel ast.SelectionSet, v graphqlmodels.ReceiveUpdateEmailList) graphql.Marshaler {
+	return ec._ReceiveUpdateEmailList(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNReceiveUpdateEmailList2ᚖS3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐReceiveUpdateEmailList(ctx context.Context, sel ast.SelectionSet, v *graphqlmodels.ReceiveUpdateEmailList) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._ReceiveUpdateEmailList(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRequestTarget2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐRequestTarget(ctx context.Context, v interface{}) (graphqlmodels.RequestTarget, error) {
+	res, err := ec.unmarshalInputRequestTarget(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNSendMail2S3_FriendManagement_GraphqlᚋgraphᚋgraphqlmodelsᚐSendMail(ctx context.Context, v interface{}) (graphqlmodels.SendMail, error) {
+	res, err := ec.unmarshalInputSendMail(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

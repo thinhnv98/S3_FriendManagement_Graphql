@@ -1,35 +1,63 @@
-
 # GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
 
 type User {
-  id: Int!
-  email: String!
+    id: Int!
+    email: String!
 }
 
 type Success {
-  status: String!
+    status: String!
 }
 
+type FriendList {
+    success: Boolean!
+    friends: [String!]!
+    count: Int!
+}
 
-type IsFriend {
-  success: Boolean!
+type IsSuccess {
+    success: Boolean!
+}
+
+type ReceiveUpdateEmailList {
+    success: Boolean!
+    recipients: [String!]!
 }
 
 input NewUser {
-  email: String!
+    email: String!
 }
 
 input Friends {
-  friends: [String!]!
+    friends: [String!]!
+}
+
+input Email {
+    email: String!
+}
+
+input RequestTarget {
+    requestor: String!,
+    target: String!
+}
+
+input SendMail {
+    sender: String!
+    text: String!
 }
 
 type Query {
-  users(id: Int, email: String): [User!]!
+    users(id: Int, email: String): [User!]!
 }
 
 type Mutation {
-  createUser(input: NewUser!): User!
-  createFriend(input: Friends!): IsFriend!
+    createUser(input: NewUser!): User!
+    createFriend(input: Friends!): IsSuccess!
+    friendList(input: Email!): FriendList!
+    commonFriends(input: Friends!): FriendList!
+    subscribe(input: RequestTarget!): IsSuccess!
+    blockUpdate(input: RequestTarget!): IsSuccess!
+    retrieveEmailReceiveUpdate(input: SendMail!): ReceiveUpdateEmailList!
 }
